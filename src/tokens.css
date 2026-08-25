@@ -1,0 +1,173 @@
+/* Hallmark · tokens.css — Grizon AI design system (custom theme)
+ * Ported into Tailwind v4's @theme so tokens double as utility classes
+ * (bg-paper, text-ink, font-display, rounded-card, shadow-md, ease-out, ...)
+ * while still being plain CSS custom properties for direct var() use.
+ */
+:root {
+  color-scheme: light;
+}
+
+@theme {
+  /* ---- Colour · light · anchor hue ~293 (brand violet) ---- */
+  --color-paper:       oklch(98.6% 0.006 300);   /* lavender-tinted near-white */
+  --color-paper-2:     oklch(96.8% 0.009 300);
+  --color-paper-3:     oklch(94.5% 0.012 300);
+  --color-ink:         oklch(23%   0.030 295);   /* deep violet-ink */
+  --color-ink-2:       oklch(44%   0.025 295);
+  --color-rule:        oklch(90%   0.013 300);
+  --color-rule-2:      oklch(93.5% 0.009 300);
+  --color-muted:       oklch(55%   0.022 295);
+  --color-accent:      oklch(63%   0.190 293);   /* #976df8 — brand violet, the hint */
+  --color-accent-deep: oklch(48%   0.230 292);   /* #6630e4 — logo deep, solid fills */
+  --color-accent-soft: oklch(95%   0.035 295);   /* violet wash for chips/marks */
+  --color-accent-cool: oklch(74%   0.120 250);   /* cool blue-violet — aurora companion */
+  --color-accent-ink:  oklch(98.6% 0.006 300);   /* paper — text on deep fill */
+  --color-accent-text: var(--color-accent-deep); /* violet text on soft/paper surfaces */
+  --color-focus:       oklch(58%   0.220 293);
+  --color-success:      oklch(64%   0.130 155);
+  --color-success-soft: oklch(95.5% 0.035 155);  /* pale wash — verified / saved pills */
+  --color-success-ink:  oklch(42%   0.110 155);  /* text on the success wash */
+  --color-warning:      oklch(72%   0.140 70);
+  --color-warning-soft: oklch(96%   0.045 75);   /* pale wash — near-limit banners */
+  --color-warning-ink:  oklch(45%   0.120 70);
+  --color-danger:       oklch(62%   0.200 18);
+  --color-danger-soft:  oklch(95.5% 0.030 18);   /* pale wash — danger zones, exhausted credits */
+  --color-danger-ink:   oklch(45%   0.180 18);   /* text on the danger wash */
+  --color-file-pdf:    oklch(52%   0.190 25);    /* file-type accent — PDF red, on chips/icons */
+  --color-scrim:       oklch(23%   0.030 295 / 0.32); /* dim behind drawers/modals — stays dark in both themes */
+
+  /* ---- Theme specimen · fixed swatches for the theme picker.
+          A tile that shows "Light" must LOOK light while the app is dark, so
+          these mirror the two theme blocks and are deliberately NOT overridden
+          under [data-theme="dark"]. Never use them for real surfaces. ---- */
+  --specimen-light-paper: oklch(98.6% 0.006 300);
+  --specimen-light-ink:   oklch(23%   0.030 295);
+  --specimen-light-rule:  oklch(90%   0.013 300);
+  --specimen-dark-paper:  oklch(16%   0.017 295);
+  --specimen-dark-ink:    oklch(96%   0.010 300);
+  --specimen-dark-rule:   oklch(24%   0.018 295);
+  --specimen-accent:      oklch(63%   0.190 293); /* identical in both themes */
+
+  /* ---- Type ---- */
+  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-body:    "Geist", "Noto Sans", ui-sans-serif, system-ui, "Noto Sans Devanagari", "Noto Sans Arabic", "Noto Sans JP", "Noto Sans SC", sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  --text-xs:   0.8rem;
+  --text-sm:   0.9rem;
+  --text-base: 1rem;
+  --text-md:   1.25rem;
+  --text-lg:   1.5rem;
+  --text-xl:   1.953rem;
+  --text-2xl:  2.441rem;
+  --text-3xl:  3.052rem;
+  --text-display:   clamp(2.75rem, 8vw, 6rem);
+  --text-display-s: clamp(2rem, 5vw, 3.25rem);
+
+  /* ---- Space · 4-pt (named, plus Tailwind's default numeric scale still applies) ---- */
+  --spacing-3xs: 0.25rem; --spacing-2xs: 0.5rem; --spacing-xs: 0.75rem;
+  --spacing-sm:  1rem;    --spacing-md:  1.5rem; --spacing-lg: 2rem;
+  --spacing-xl:  3rem;    --spacing-2xl: 4.5rem; --spacing-3xl: 7rem;
+  --space-3xs: 0.25rem; --space-2xs: 0.5rem; --space-xs: 0.75rem;
+  --space-sm:  1rem;    --space-md:  1.5rem; --space-lg: 2rem;
+  --space-xl:  3rem;    --space-2xl: 4.5rem; --space-3xl: 7rem;
+  --page-gutter: clamp(1.25rem, 5vw, 3.5rem);
+
+  /* ---- Radius ---- */
+  --radius-sm:    10px;
+  --radius-input: 14px;
+  --radius-card:  18px;
+  --radius-pill:  999px;
+
+  /* ---- Elevation · violet-tinted, diffuse ---- */
+  --shadow-sm: 0 1px 2px oklch(30% 0.03 295 / 0.06);
+  --shadow-md: 0 6px 22px oklch(30% 0.03 295 / 0.08);
+  --shadow-lg: 0 18px 48px oklch(30% 0.04 295 / 0.12);
+
+  /* ---- Glass (liquid-glass material, for elements floating over content) ---- */
+  --glass-fill:        color-mix(in oklch, var(--color-paper) 26%, transparent);
+  --glass-fill-strong: color-mix(in oklch, var(--color-paper) 38%, transparent);
+  --glass-stroke:      color-mix(in oklch, var(--color-paper) 58%, transparent);
+  --glass-edge:        oklch(99% 0.004 300 / 0.92);   /* bright specular top highlight */
+  --glass-blur:        blur(10px) saturate(190%);      /* clearer glass — shows shapes, not full frost */
+  --glass-blur-strong: blur(32px) saturate(190%);      /* heavy frost for floating menus — backdrop reads as a smooth wash so low-opacity text stays legible */
+  /* translucent top-bright → bottom sheen, so the material refracts even over pale areas */
+  --glass-sheen:       linear-gradient(180deg, color-mix(in oklch, var(--color-paper) 46%, transparent), color-mix(in oklch, var(--color-paper) 24%, transparent));
+  --shadow-glass:      0 14px 36px oklch(30% 0.05 295 / 0.18), inset 0 1px 0.5px var(--glass-edge), inset 0 -10px 22px -12px color-mix(in oklch, var(--color-accent) 16%, transparent);
+
+  /* ---- Motion ---- */
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in:     cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-short: 200ms;
+  --duration-mid:   300ms;
+  --dur-short: 200ms;
+  --dur-mid:   300ms;
+
+  --rule-hair: 1px;
+}
+
+/* ============================================================
+   DARK · "Lavender Dusk" — the light theme mirrored onto a deep
+   violet-charcoal canvas. Same anchor hue (~295), accent nudged
+   brighter so violet reads against the dark without glaring.
+   Only colour, elevation and glass change; type / space / radius
+   / motion stay shared. Everything else adapts via color-mix on
+   --color-paper, so no per-component dark rules are needed.
+   ============================================================ */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* ---- Surfaces · deep, never pure black (kinder on the eyes).
+          Steps kept TIGHT so cards lift only a touch from the base —
+          soft, blended elevation rather than hard-edged boxes. ---- */
+  --color-paper:       oklch(16%   0.017 295);   /* violet-charcoal base */
+  --color-paper-2:     oklch(18.5% 0.019 295);   /* lifted panels / cards */
+  --color-paper-3:     oklch(21.5% 0.021 295);   /* chips / hover wells */
+
+  /* ---- Ink · near-white, faintly violet so it sits in the family ---- */
+  --color-ink:         oklch(96%   0.010 300);   /* headings / primary text */
+  --color-ink-2:       oklch(83%   0.016 300);   /* body copy */
+  --color-muted:       oklch(66%   0.022 295);   /* captions / labels */
+
+  /* ---- Rules · dim hairlines — define edges without harsh contrast ---- */
+  --color-rule:        oklch(24%   0.018 295);
+  --color-rule-2:      oklch(20.5% 0.015 295);
+
+  /* ---- Accent · brightened violet; deep fill stays saturated so
+          white text on it keeps AA contrast ---- */
+  --color-accent:      oklch(63%   0.190 293);   /* same as light theme (#976df8) */
+  --color-accent-deep: oklch(54%   0.225 293);   /* solid fills — deep enough for AA white text */
+  --color-accent-soft: oklch(33%   0.075 295);   /* violet wash for chips/marks */
+  --color-accent-cool: oklch(72%   0.110 250);   /* aurora companion */
+  --color-accent-ink:  oklch(98%   0.006 300);   /* near-white text on deep fill */
+  --color-accent-text: oklch(80%   0.160 293);   /* BRIGHT violet — text on the dark soft wash, high contrast */
+  --color-focus:       oklch(74%   0.190 293);   /* brighter ring for visibility */
+
+  /* ---- Semantic · lifted so they glow on dark, paired with icons.
+          The *-soft washes mirror --color-accent-soft's depth (~32% L)
+          so tinted blocks sit just above the paper, never glare. ---- */
+  --color-success:      oklch(72%   0.140 155);
+  --color-success-soft: oklch(31%   0.055 155);
+  --color-success-ink:  oklch(84%   0.110 155);  /* light, for text on dark success wash */
+  --color-warning:      oklch(80%   0.150 75);
+  --color-warning-soft: oklch(32%   0.055 75);
+  --color-warning-ink:  oklch(84%   0.140 75);   /* light, for text on dark warn wash */
+  --color-danger:       oklch(68%   0.190 18);
+  --color-danger-soft:  oklch(32%   0.065 18);
+  --color-danger-ink:   oklch(82%   0.130 18);   /* light, for text on dark danger wash */
+  --color-file-pdf:    oklch(62%   0.190 25);    /* brighter so the icon reads on dark */
+  --color-scrim:       oklch(0%    0     0 / 0.50); /* deeper black — dark surface needs a stronger dim */
+
+  /* ---- Elevation · neutral black, deeper opacity (violet-tinted
+          light shadows are invisible on a dark surface) ---- */
+  --shadow-sm: 0 1px 2px   oklch(0% 0 0 / 0.40);
+  --shadow-md: 0 6px 22px  oklch(0% 0 0 / 0.46);
+  --shadow-lg: 0 20px 52px oklch(0% 0 0 / 0.58);
+
+  /* ---- Glass · fill/stroke/sheen rebuild from the dark paper
+          automatically; only the bright specular edge + the cast
+          shadow need re-pitching for dark ---- */
+  --glass-edge:   oklch(100% 0 0 / 0.10);
+  --shadow-glass: 0 16px 40px oklch(0% 0 0 / 0.55), inset 0 1px 0.5px var(--glass-edge), inset 0 -10px 22px -12px color-mix(in oklch, var(--color-accent) 22%, transparent);
+}

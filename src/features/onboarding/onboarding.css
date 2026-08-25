@@ -1,0 +1,127 @@
+/* Hallmark · component: onboarding-flow · genre: modern-minimal · theme: locked custom (violet ~293)
+ * pre-emit critique: P5 H5 E5 S5 R5 V4
+ * Structure: ledger-rail takeover — numbered ladder (left) · stage (right) · action bar.
+ * Deliberately NOT the settings icon-rail, so a first run reads as its own moment
+ * while sharing every token with Settings.
+ * Only what Tailwind utilities can't express lives here: the takeover entrance,
+ * the staged stage-reveal, the ladder progress meter, and the theme specimens.
+ * Every value references a token.
+ */
+
+/* ---- 1 · Entrance — same grammar as .settings-shell, one beat slower ---- */
+.onboarding-shell {
+  opacity: 0;
+  transition: opacity var(--dur-mid) var(--ease-out), transform var(--dur-mid) var(--ease-out);
+}
+.onboarding-shell[data-open='true'] {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .onboarding-shell {
+    transform: scale(1.015);
+  }
+}
+
+/* ---- 2 · Ambient bloom · Tier-A CSS art. Same colour-mix recipe as the
+        landing blooms so the first run feels continuous with the marketing
+        surface the user just came from. ---- */
+.onboarding-bloom-a {
+  background: radial-gradient(
+    circle at center,
+    color-mix(in oklch, var(--color-accent) 24%, transparent) 0%,
+    color-mix(in oklch, var(--color-accent) 8%, transparent) 40%,
+    transparent 68%
+  );
+}
+.onboarding-bloom-b {
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in oklch, var(--color-accent-cool) 30%, transparent) 0%,
+    color-mix(in oklch, var(--color-accent) 14%, transparent) 46%,
+    transparent 74%
+  );
+}
+:root[data-theme='dark'] .onboarding-bloom-a {
+  background: radial-gradient(
+    circle at center,
+    color-mix(in oklch, var(--color-accent) 40%, transparent) 0%,
+    color-mix(in oklch, var(--color-accent) 15%, transparent) 40%,
+    transparent 66%
+  );
+}
+
+/* ---- 3 · Stage reveal — one primitive, staggered across the step's blocks.
+        Re-keyed on step change so every step enters the same way. ---- */
+@media (prefers-reduced-motion: no-preference) {
+  .onboarding-stage > * {
+    animation: onboarding-rise var(--dur-mid) var(--ease-out) both;
+  }
+  .onboarding-stage > *:nth-child(2) { animation-delay: 60ms; }
+  .onboarding-stage > *:nth-child(3) { animation-delay: 120ms; }
+  .onboarding-stage > *:nth-child(4) { animation-delay: 180ms; }
+}
+@keyframes onboarding-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .onboarding-stage > * {
+    animation: onboarding-fade 150ms var(--ease-out) both;
+  }
+}
+@keyframes onboarding-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ---- 4 · Ladder meter · height/width driven by an inline --progress,
+        mirroring the .settings-bar pattern already in the system ---- */
+.onboarding-meter-y {
+  height: calc(var(--progress, 0) * 1%);
+  background: linear-gradient(180deg, var(--color-accent), var(--color-accent-cool));
+  transition: height var(--dur-mid) var(--ease-out);
+}
+.onboarding-meter-x {
+  width: calc(var(--progress, 0) * 1%);
+  background: linear-gradient(90deg, var(--color-accent), var(--color-accent-cool));
+  transition: width var(--dur-mid) var(--ease-out);
+}
+@media (prefers-reduced-motion: reduce) {
+  .onboarding-meter-y,
+  .onboarding-meter-x { transition: none; }
+}
+
+/* ---- 5 · Theme specimens · fixed swatches, so "Light" looks light even
+        while the app is dark. Decorative only — never carries text. ---- */
+.onboarding-specimen {
+  border: var(--rule-hair) solid var(--specimen-light-rule);
+}
+.onboarding-specimen-light {
+  background: var(--specimen-light-paper);
+}
+.onboarding-specimen-light .onboarding-specimen-bar {
+  background: var(--specimen-light-ink);
+}
+.onboarding-specimen-dark {
+  background: var(--specimen-dark-paper);
+  border-color: var(--specimen-dark-rule);
+}
+.onboarding-specimen-dark .onboarding-specimen-bar {
+  background: var(--specimen-dark-ink);
+}
+/* System shows both halves; its bars take the accent, which reads on either. */
+.onboarding-specimen-system {
+  background: linear-gradient(
+    115deg,
+    var(--specimen-light-paper) 0 50%,
+    var(--specimen-dark-paper) 50% 100%
+  );
+}
+.onboarding-specimen-system .onboarding-specimen-bar {
+  background: var(--specimen-accent);
+}
+.onboarding-specimen-dot {
+  background: var(--specimen-accent);
+}

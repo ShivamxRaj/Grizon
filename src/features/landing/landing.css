@@ -1,0 +1,95 @@
+/* Ambient background bloom + grain — signature marketing-page atmosphere,
+   shared visual language with the static landing/design-style pages.
+   Colours stay token-driven (var(--color-accent...)); only the color-mix
+   percentage and opacity are hand-tuned per theme so the bloom stays
+   visible against both a pale and a near-black canvas. */
+
+.landing-bloom-a {
+  /* static translateX matches the breathe keyframes below — see the
+     .landing-nav comment for why this can't be a Tailwind translate-x-*
+     utility on the element itself */
+  transform: translateX(-50%);
+  background: radial-gradient(
+    circle at center,
+    color-mix(in oklch, var(--color-accent) 26%, transparent) 0%,
+    color-mix(in oklch, var(--color-accent) 9%, transparent) 38%,
+    transparent 66%
+  );
+}
+
+.landing-bloom-b {
+  background: radial-gradient(circle at center, color-mix(in oklch, var(--color-accent) 16%, transparent) 0%, transparent 64%);
+}
+
+.landing-bloom-top {
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in oklch, var(--color-accent-cool) 38%, transparent) 0%,
+    color-mix(in oklch, var(--color-accent) 26%, transparent) 42%,
+    transparent 72%
+  );
+}
+
+.landing-grain {
+  background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="180" height="180"%3E%3Cfilter id="n"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23n)"/%3E%3C/svg%3E');
+}
+
+:root[data-theme='dark'] .landing-grain {
+  mix-blend-mode: screen;
+  opacity: 0.025;
+}
+:root[data-theme='dark'] .landing-bloom-top {
+  opacity: 1;
+}
+:root[data-theme='dark'] .landing-bloom-b {
+  opacity: 0.5;
+}
+:root[data-theme='dark'] .landing-bloom-a {
+  background: radial-gradient(
+    circle at center,
+    color-mix(in oklch, var(--color-accent) 42%, transparent) 0%,
+    color-mix(in oklch, var(--color-accent) 17%, transparent) 38%,
+    transparent 66%
+  );
+}
+
+@keyframes landing-breathe {
+  0%,
+  100% {
+    opacity: 0.52;
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    opacity: 0.66;
+    transform: translateX(-50%) scale(1.06);
+  }
+}
+
+@keyframes landing-nav-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%);
+  }
+}
+
+/* Tailwind v4 utilities like -translate-x-1/2 set the standalone `translate`
+   property, which composes additively with `transform` (CSS Transforms
+   Level 2) rather than overriding it. Centering the nav pill here — as a
+   single `transform` declaration shared with the entrance keyframes — keeps
+   the animation's `to` state as the only source of the -50% offset. */
+.landing-nav {
+  transform: translateX(-50%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .landing-bloom-a {
+    animation: landing-breathe 14s var(--ease-in-out) infinite;
+  }
+  .landing-nav {
+    animation: landing-nav-in 0.7s var(--ease-out) both;
+  }
+}

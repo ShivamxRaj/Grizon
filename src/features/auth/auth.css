@@ -1,0 +1,106 @@
+/* Auth popup — scrim/shell entrance, step-panel transitions, and the
+   error-shake / success-checkmark micro-motion can't be expressed as
+   plain Tailwind utilities. Same pattern as chat.css / landing.css. */
+
+.auth-scrim {
+  opacity: 0;
+  transition: opacity var(--dur-mid) var(--ease-out);
+}
+.auth-scrim[data-open='true'] {
+  opacity: 1;
+}
+
+.auth-shell {
+  opacity: 0;
+  transform: translateY(18px) scale(0.97);
+  transition:
+    opacity var(--dur-mid) var(--ease-out),
+    transform var(--dur-mid) var(--ease-out);
+}
+.auth-shell[data-open='true'] {
+  opacity: 1;
+  transform: none;
+}
+
+@keyframes auth-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .auth-panel {
+    animation: auth-panel-in 320ms var(--ease-out) both;
+  }
+}
+
+/* Hide Edge/IE native reveal so only the custom eye toggle shows. */
+.auth-panel input[type='password']::-ms-reveal,
+.auth-panel input[type='password']::-ms-clear {
+  display: none;
+}
+
+@keyframes auth-shake {
+  10%,
+  90% {
+    transform: translateX(-1px);
+  }
+  20%,
+  80% {
+    transform: translateX(2px);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translateX(-3px);
+  }
+  40%,
+  60% {
+    transform: translateX(3px);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .auth-field-error input {
+    animation: auth-shake 320ms var(--ease-in-out);
+  }
+}
+
+@keyframes auth-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .auth-success-check {
+    animation: auth-pop-in 320ms var(--ease-out) both;
+  }
+}
+
+@keyframes auth-check-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.auth-success-check svg path {
+  stroke-dasharray: 24;
+  stroke-dashoffset: 24;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .auth-success-check svg path {
+    animation: auth-check-draw 420ms var(--ease-out) 150ms forwards;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .auth-success-check svg path {
+    stroke-dashoffset: 0;
+  }
+}

@@ -1,0 +1,69 @@
+/* Hallmark · macrostructure: Workbench · tone: technical · genre: modern-minimal
+ * theme: locked Grizon tokens (preserve) · nav: in-app back · footer: none
+ * enrichment: none · layout: horizontal scroll plan rail
+ * Pre-emit critique: P4 H4 E4 S4 R5 V4
+ */
+.pricing-page {
+  overflow-x: clip;
+}
+
+.pricing-track {
+  display: flex;
+  gap: var(--space-md);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  padding-bottom: var(--space-sm);
+  -webkit-overflow-scrolling: touch;
+}
+
+.pricing-track::-webkit-scrollbar {
+  height: 6px;
+}
+
+.pricing-track::-webkit-scrollbar-thumb {
+  background: var(--color-rule);
+  border-radius: var(--radius-pill);
+}
+
+.pricing-card {
+  flex: 0 0 min(17.5rem, 78vw);
+  scroll-snap-align: start;
+  min-width: 0;
+}
+
+.pricing-card[data-featured='true'] {
+  border-color: color-mix(in oklch, var(--color-accent) 45%, var(--color-rule));
+  background: color-mix(in oklch, var(--color-accent-soft) 55%, var(--color-paper));
+}
+
+.pricing-page .pricing-cta:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.pricing-page .pricing-cta[data-state='loading'] {
+  opacity: 0.7;
+}
+
+.pricing-page .pricing-cta:focus-visible,
+.phone-collect-dialog button:focus-visible,
+.phone-collect-dialog input:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.pricing-page .pricing-cta:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.phone-collect-dialog {
+  max-width: min(24rem, calc(100vw - 2 * var(--space-md)));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pricing-page *,
+  .phone-collect-dialog * {
+    transition-duration: 0.01ms !important;
+  }
+}

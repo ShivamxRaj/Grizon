@@ -1,0 +1,105 @@
+/* Hallmark · component: settings-modal · genre: modern-minimal · theme: locked custom (violet ~293)
+ * pre-emit critique: P5 H5 E4 S5 R5 V4
+ * Only what Tailwind utilities can't express lives here: the three motion
+ * primitives (entrance / pane crossfade / mobile drill), the toggle track,
+ * and the CSS-only usage bars. Every value references a token.
+ */
+
+/* ---- 1 · Entrance — mirrors .auth-scrim / .auth-shell, driven by data-open ---- */
+.settings-scrim {
+  opacity: 0;
+  transition: opacity var(--dur-mid) var(--ease-out);
+}
+.settings-scrim[data-open='true'] {
+  opacity: 1;
+}
+
+.settings-shell {
+  opacity: 0;
+  transition: opacity var(--dur-mid) var(--ease-out), transform var(--dur-mid) var(--ease-out);
+}
+.settings-shell[data-open='true'] {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .settings-shell {
+    transform: translateY(18px) scale(0.97);
+  }
+}
+
+/* ---- 2 · Pane crossfade — re-keyed on section change ---- */
+@media (prefers-reduced-motion: no-preference) {
+  .settings-pane {
+    animation: settings-pane-in var(--dur-short) var(--ease-out) both;
+  }
+}
+@keyframes settings-pane-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---- 3 · Mobile drill — level 2 enters from the right ---- */
+@media (prefers-reduced-motion: no-preference) {
+  .settings-drill {
+    animation: settings-drill-in var(--dur-mid) var(--ease-out) both;
+  }
+}
+@keyframes settings-drill-in {
+  from { transform: translateX(100%); }
+  to   { transform: none; }
+}
+
+/* Reduced motion: all three collapse to a short opacity crossfade. */
+@media (prefers-reduced-motion: reduce) {
+  .settings-pane,
+  .settings-drill {
+    animation: settings-fade 150ms var(--ease-out) both;
+  }
+}
+@keyframes settings-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ---- Toggle · the track/thumb pair can't be expressed as utilities alone ---- */
+.settings-toggle {
+  background: var(--color-paper-3);
+  border: var(--rule-hair) solid var(--color-rule);
+  transition: background-color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out);
+}
+.settings-toggle[aria-checked='true'] {
+  background: var(--color-accent-deep);
+  border-color: var(--color-accent-deep);
+}
+.settings-toggle:not([disabled]):hover {
+  border-color: var(--color-accent);
+}
+.settings-toggle[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.settings-toggle-thumb {
+  background: var(--color-paper);
+  box-shadow: var(--shadow-sm);
+  transform: translateX(0);
+  transition: transform var(--dur-short) var(--ease-out);
+}
+.settings-toggle[aria-checked='true'] .settings-toggle-thumb {
+  transform: translateX(0.95rem);
+}
+@media (prefers-reduced-motion: reduce) {
+  .settings-toggle-thumb { transition: none; }
+}
+
+/* ---- Usage bars · height driven by an inline --bar custom property ---- */
+.settings-bar {
+  height: max(2px, calc(var(--bar, 0) * 1%));
+  background: linear-gradient(180deg, var(--color-accent), var(--color-accent-cool));
+}
+
+/* Long free text (memories, instructions) must never push the pane wide. */
+.settings-wrap {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}

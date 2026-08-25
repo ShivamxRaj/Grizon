@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: grizon-legal-backend
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.10
+      - key: GROQ_API_KEY
+        sync: true
+      - key: DEEPSEEK_API_KEY
+        sync: true
+      - key: SARVAM_API_KEY
+        sync: true
+      - key: SERPER_API_KEY
+        sync: true
+      - key: JWT_SECRET
+        generateValue: true

@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+httpx
+python-dotenv
+openai
+pydantic
+pypdf
+python-multipart
+PyJWT
+sse-starlette
+beautifulsoup4
+sarvamai
