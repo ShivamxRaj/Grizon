@@ -1,7 +1,8 @@
 import { ApiError } from './errors'
 import { isRecord, isString } from './guards'
 
-const API_BASE_URL: string = import.meta.env.VITE_API_BASE_URL ?? ''
+const API_BASE_URL: string = (import.meta.env.VITE_API_BASE_URL && import.meta.env.VITE_API_BASE_URL.trim() !== '') ? import.meta.env.VITE_API_BASE_URL : 'https://grizon-backend.onrender.com'
+
 const PLATFORM_HEADER = 'web'
 
 type AccessTokenGetter = () => string | null
