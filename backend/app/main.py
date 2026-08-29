@@ -267,12 +267,11 @@ FILES = {}
 # ─────────────────────────────────────────────────────────────
 from fastapi.responses import RedirectResponse
 
-@app.get("/")
+@app.api_route("/", methods=["GET", "HEAD"])
 async def root():
-    # Redirect to Vite Frontend so users opening port 8000 are forwarded automatically
-    return RedirectResponse(url="http://localhost:5173/")
+    return {"status": "ok", "message": "Grizon Legal Agent Backend API"}
 
-@app.get("/health")
+@app.api_route("/health", methods=["GET", "HEAD"])
 async def health():
     return {"status": "ok"}
 
