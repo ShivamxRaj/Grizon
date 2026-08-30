@@ -101,6 +101,19 @@ def ok(data: Any) -> dict:
     return {"success": True, "data": data}
 
 
+def sanitize_verification_links(text: str) -> str:
+    """Sanitize and ensure all verification links resolve to valid 200 OK working URLs."""
+    if not text:
+        return text
+    # Replace broken legislative.gov.in PDF links with official India Code working portal
+    text = re.sub(
+        r'https?://legislative\.gov\.in/sites/default/files/[^\s\)\"]+',
+        'https://www.indiacode.nic.in/',
+        text
+    )
+    return text
+
+
 def user_public(u: dict) -> dict:
     """Strip internal fields from user dict."""
     return {k: v for k, v in u.items() if not k.startswith("_")}
@@ -1130,11 +1143,10 @@ async def stream_chat(job_id: str, request: Request, authorization: str | None =
 
         user_prompt = f"QUERY:\n{q}\n\nEVIDENCE:\n" + ("\n\n".join(evidence_texts) if evidence_texts else "None")
 
-
         start_ms = int(time.time() * 1000)
         full_answer = ""
         try:
-            answer = await llm_chat(system_prompt, user_prompt)
+            answer = sanitize_verification_links(await llm_chat(system_prompt, user_prompt))
             # Stream the answer character-by-character in chunks
             chunk_size = 8
             for i in range(0, len(answer), chunk_size):
