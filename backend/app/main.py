@@ -1089,15 +1089,15 @@ async def stream_chat(job_id: str, request: Request, authorization: str | None =
                     s = await serper_search(q)
                     if isinstance(s, dict) and "organic" in s:
                         for item in s["organic"][:2]:
-                            snippet = item.get('snippet', '')[:250]
+                            snippet = item.get('snippet', '')[:200]
                             evidence_texts.append(f"Title: {item.get('title')}\nSnippet: {snippet}\nURL: {item.get('link')}")
                 except Exception as e:
                     print(f"Serper search warning: {e}")
             try:
                 k = await kanoon_search(q)
                 if isinstance(k, list):
-                    for item in k[:2]:
-                        snippet = item.get('snippet', '')[:300]
+                    for item in k[:3]:
+                        snippet = item.get('snippet', '')[:200]
                         evidence_texts.append(f"Title: {item.get('title')}\nSnippet: {snippet}\nURL: {item.get('link')}")
             except Exception as e:
                 print(f"Kanoon search warning: {e}")
@@ -1126,10 +1126,11 @@ async def stream_chat(job_id: str, request: Request, authorization: str | None =
                 "## 📜 Applicable Laws & Acts\n"
                 "## ⚖️ Relevant Precedents\n"
                 "## 🔗 Verification Sources\n"
-                "(Include markdown links [Title](URL) from evidence under Verification Sources).\n"
+                "CRITICAL MANDATE FOR VERIFICATION SOURCES:\n"
+                "Under 'Verification Sources', you MUST list the titles and clickable markdown links [Title](URL) strictly using the exact IndianKanoon URLs (https://indiankanoon.org/doc/...) provided in the EVIDENCE context. DO NOT hallucinate external URLs.\n"
                 "End with: *Disclaimer: AI-generated legal research, not legal advice.*"
             )
-            max_tokens_limit = 800
+            max_tokens_limit = 850
 
         raw_evidence = "\n\n".join(evidence_texts) if evidence_texts else "None"
         if len(raw_evidence) > 1200:
