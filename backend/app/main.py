@@ -1130,7 +1130,7 @@ async def stream_chat(job_id: str, request: Request, authorization: str | None =
                 "Under 'Verification Sources', you MUST list the titles and clickable markdown links [Title](URL) strictly using the exact IndianKanoon URLs (https://indiankanoon.org/doc/...) provided in the EVIDENCE context. DO NOT hallucinate external URLs.\n"
                 "End with: *Disclaimer: AI-generated legal research, not legal advice.*"
             )
-            max_tokens_limit = 850
+            max_tokens_limit = 1100
 
         raw_evidence = "\n\n".join(evidence_texts) if evidence_texts else "None"
         if len(raw_evidence) > 1200:
