@@ -1081,22 +1081,24 @@ async def stream_chat(job_id: str, request: Request, authorization: str | None =
         words = clean_q.split()
         is_greeting = len(words) <= 5 and any(clean_q.startswith(g) or clean_q == g or g in words for g in greetings_list)
 
-        # 2. Query search databases if query is active and not a simple greeting
+        # 2. Query search databases if query is active and not a simple greeting (Capped results for token optimization)
         if not is_greeting:
             live = any(x in q.lower() for x in ["latest", "recent", "today", "notification", "circular"])
             if live:
                 try:
                     s = await serper_search(q)
                     if isinstance(s, dict) and "organic" in s:
-                        for item in s["organic"][:3]:
-                            evidence_texts.append(f"Title: {item.get('title')}\nSnippet: {item.get('snippet')}\nURL: {item.get('link')}")
+                        for item in s["organic"][:2]:
+                            snippet = item.get('snippet', '')[:250]
+                            evidence_texts.append(f"Title: {item.get('title')}\nSnippet: {snippet}\nURL: {item.get('link')}")
                 except Exception as e:
                     print(f"Serper search warning: {e}")
             try:
                 k = await kanoon_search(q)
                 if isinstance(k, list):
-                    for item in k[:3]:
-                        evidence_texts.append(f"Title: {item.get('title')}\nSnippet: {item.get('snippet')}\nURL: {item.get('link')}")
+                    for item in k[:2]:
+                        snippet = item.get('snippet', '')[:300]
+                        evidence_texts.append(f"Title: {item.get('title')}\nSnippet: {snippet}\nURL: {item.get('link')}")
             except Exception as e:
                 print(f"Kanoon search warning: {e}")
 
@@ -1107,46 +1109,38 @@ async def stream_chat(job_id: str, request: Request, authorization: str | None =
         }
         await asyncio.sleep(0.1)
 
-        # --- Call LLM ---
+        # --- Call LLM (Token-Minimized Configuration) ---
         if is_greeting:
             system_prompt = (
-                "You are Grizon Legal AI, an expert AI legal assistant for Indian Law. "
-                "The user has sent a general greeting or non-legal introductory message. "
-                "CRITICAL LANGUAGE RULE: Respond STRICTLY AND EXCLUSIVELY IN ENGLISH. "
-                "DO NOT use any Hinglish, Hindi, or transliterated words (e.g. NEVER say 'Kaise hain aap', 'badhiya hoon', 'bataiye', 'madad'). "
-                "Greet them back naturally in pure English (e.g. 'Hello! How can I assist you with your legal case, IPC/BNS section, or legal dispute today?'). "
-                "Only switch to another language if the user explicitly wrote their message in Hindi script, Tamil, or explicitly asked for another language. "
-                "Keep your response short, friendly, and welcoming. "
-                "Do NOT output structured legal headers like 'Preliminary Legal Assessment' or 'Applicable Laws'."
+                "You are Grizon Legal AI (Indian Law assistant). "
+                "Respond strictly in pure English. Greet the user warmly and ask how you can assist with their legal query. "
+                "Keep response under 40 words. Do NOT use markdown legal sections."
             )
+            max_tokens_limit = 150
         else:
             system_prompt = (
-                "You are the Legal Research & Case Analysis Agent for Indian law. "
-                "IMPORTANT: BNS stands for Bharatiya Nyaya Sanhita, BNSS stands for Bharatiya Nagarik Suraksha Sanhita, "
-                "and BSA stands for Bharatiya Sakshya Adhiniyam. You must analyze queries under Indian Law only. "
-                "NEVER refer to BNS as Bangladesh Penal Code or reference Bangladesh legal systems. "
-                "DEFAULT LANGUAGE RULE: Write your entire explanation in clear, professional English by default. "
-                "DO NOT use Hinglish or regional language transliteration unless the user explicitly wrote their prompt in that language or requested it. Otherwise, stick strictly to pure English. "
-                "Return a structured, well-formatted markdown response with these sections:\n"
+                "You are the Legal Research Agent for Indian Law (BNS = Bharatiya Nyaya Sanhita, BNSS = Bharatiya Nagarik Suraksha Sanhita, BSA = Bharatiya Sakshya Adhiniyam). "
+                "Provide a concise, accurate legal assessment strictly in English. "
+                "Return a compact markdown response with these sections:\n"
                 "## 📋 Preliminary Legal Assessment\n"
                 "## 📜 Applicable Laws & Acts\n"
-                "## ⚖️ Relevant Case Law Precedents\n"
-                "## 🔍 Arguments For & Against\n"
-                "## 📌 Procedural & Risk Considerations\n"
+                "## ⚖️ Relevant Precedents\n"
                 "## 🔗 Verification Sources\n"
-                "Under the 'Verification Sources' section, you MUST list the titles and clickable Markdown links "
-                "(e.g., [Title](URL)) of the relevant Indian Kanoon cases or other websites from the context that you relied upon. "
-                "Ensure the links are formatted exactly as markdown links.\n\n"
-                "Use bullet points, bold key terms, and cite specific sections/cases.\n"
-                "End with: *Disclaimer: This is AI-generated legal research, not legal advice.*"
+                "(Include markdown links [Title](URL) from evidence under Verification Sources).\n"
+                "End with: *Disclaimer: AI-generated legal research, not legal advice.*"
             )
+            max_tokens_limit = 800
 
-        user_prompt = f"QUERY:\n{q}\n\nEVIDENCE:\n" + ("\n\n".join(evidence_texts) if evidence_texts else "None")
+        raw_evidence = "\n\n".join(evidence_texts) if evidence_texts else "None"
+        if len(raw_evidence) > 1200:
+            raw_evidence = raw_evidence[:1200] + "\n[Context truncated to minimize tokens]"
+
+        user_prompt = f"QUERY:\n{q}\n\nEVIDENCE:\n{raw_evidence}"
 
         start_ms = int(time.time() * 1000)
         full_answer = ""
         try:
-            answer = sanitize_verification_links(await llm_chat(system_prompt, user_prompt))
+            answer = sanitize_verification_links(await llm_chat(system_prompt, user_prompt, max_tokens=max_tokens_limit))
             # Stream the answer character-by-character in chunks
             chunk_size = 8
             for i in range(0, len(answer), chunk_size):

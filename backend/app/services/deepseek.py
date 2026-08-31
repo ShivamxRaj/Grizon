@@ -46,12 +46,12 @@ def should_use_deepseek(user_prompt: str) -> bool:
         
     return False
 
-async def chat(system: str, user: str):
+async def chat(system: str, user: str, max_tokens: int = 850):
     # Determine routing based on query complexity
     route = "deepseek" if should_use_deepseek(user) else "groq"
     
     client, model = get_client_and_model(route)
-    print(f"Routing request to model: {model} (route: {route})")
+    print(f"Routing request to model: {model} (route: {route}, max_tokens: {max_tokens})")
     
     r = await client.chat.completions.create(
         model=model,
@@ -59,7 +59,9 @@ async def chat(system: str, user: str):
             {'role': 'system', 'content': system},
             {'role': 'user', 'content': user}
         ],
-        temperature=0.2
+        temperature=0.2,
+        max_tokens=max_tokens
     )
     return r.choices[0].message.content
+
 
