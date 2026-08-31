@@ -101,16 +101,38 @@ def ok(data: Any) -> dict:
     return {"success": True, "data": data}
 
 
-def sanitize_verification_links(text: str) -> str:
-    """Sanitize and ensure all verification links resolve to valid 200 OK working URLs."""
+def sanitize_verification_links(text: str, evidence_texts: list[str] = None) -> str:
+    """Sanitize and ensure all verification links resolve to valid working URLs."""
     if not text:
         return text
-    # Replace broken legislative.gov.in PDF links with official India Code working portal
+
+    # 1. Replace broken legislative.gov.in PDF links with official India Code working portal
     text = re.sub(
         r'https?://legislative\.gov\.in/sites/default/files/[^\s\)\"]+',
         'https://www.indiacode.nic.in/',
         text
     )
+
+    # 2. Extract valid IndianKanoon URLs from evidence_texts if present
+    evidence_kanoon_links = []
+    if evidence_texts:
+        for ev in evidence_texts:
+            if "indiankanoon.org" in ev:
+                lines = ev.split("\n")
+                title = lines[0].replace("Title: ", "").strip() if lines else "Indian Kanoon Case Law"
+                url_line = next((l for l in lines if "indiankanoon.org" in l), "")
+                if url_line:
+                    url = url_line.replace("URL: ", "").strip()
+                    evidence_kanoon_links.append(f"- [{title}]({url})")
+
+    # 3. Ensure a clean '## 🔗 Verification Sources' section with working IndianKanoon links exists
+    if "indiankanoon.org" not in text and evidence_kanoon_links:
+        sources_block = "\n\n## 🔗 Verification Sources\n" + "\n".join(evidence_kanoon_links)
+        if "*Disclaimer:" in text:
+            text = text.replace("*Disclaimer:", sources_block + "\n\n*Disclaimer:")
+        else:
+            text += sources_block
+
     return text
 
 
@@ -1146,7 +1168,7 @@ async def stream_chat(job_id: str, request: Request, authorization: str | None =
         start_ms = int(time.time() * 1000)
         full_answer = ""
         try:
-            answer = sanitize_verification_links(await llm_chat(system_prompt, user_prompt))
+            answer = sanitize_verification_links(await llm_chat(system_prompt, user_prompt), evidence_texts=evidence_texts)
             # Stream the answer character-by-character in chunks
             chunk_size = 8
             for i in range(0, len(answer), chunk_size):
