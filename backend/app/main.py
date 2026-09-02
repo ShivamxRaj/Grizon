@@ -569,36 +569,53 @@ async def upload_file_endpoint(req: UploadFileInput, authorization: str | None =
     file_id = f"file_{uuid.uuid4().hex[:10]}"
     now = NOW_ISO()
     
-    # Extract text if PDF or Text file
+    # Extract text for PDF, Image (scanned handwritten document photo), or Text file
     extracted_text = ""
-    pdf_bytes = None
+    file_bytes = None
+    import base64
+    try:
+        file_bytes = base64.b64decode(req.contentBase64)
+    except Exception:
+        pass
+
     if req.fileType == "application/pdf":
-        import io, base64
+        import io
         from pypdf import PdfReader
         try:
-            pdf_bytes = base64.b64decode(req.contentBase64)
-            pdf_file = io.BytesIO(pdf_bytes)
-            reader = PdfReader(pdf_file)
-            text_list = []
-            for page in reader.pages:
-                text_list.append(page.extract_text() or "")
-            extracted_text = "\n".join(text_list)
+            if file_bytes:
+                pdf_file = io.BytesIO(file_bytes)
+                reader = PdfReader(pdf_file)
+                text_list = []
+                for page in reader.pages:
+                    text_list.append(page.extract_text() or "")
+                extracted_text = "\n".join(text_list)
         except Exception as e:
-            extracted_text = f"Error extracting PDF text: {e}"
+            extracted_text = ""
 
-        # If digital PDF text extraction returned empty or very short text (scanned document), use Sarvam Document Intelligence OCR
-        if len(extracted_text.strip()) < 50 and pdf_bytes and sarvam_service.is_configured():
+        # If PDF text extraction returned empty/short text (scanned handwritten paper), use Sarvam OCR
+        if len(extracted_text.strip()) < 60 and file_bytes and sarvam_service.is_configured():
             try:
-                ocr_text = await sarvam_service.ocr_document(pdf_bytes, req.fileName)
+                ocr_text = await sarvam_service.ocr_document(file_bytes, req.fileName)
                 if ocr_text.strip():
                     extracted_text = ocr_text
             except Exception as e:
-                print("Sarvam OCR fallback error:", e)
+                print("Sarvam OCR fallback error for PDF:", e)
+
+    elif req.fileType and req.fileType.startswith("image/"):
+        # Scanned handwritten paper uploaded as an Image (JPEG / PNG photo)
+        if file_bytes and sarvam_service.is_configured():
+            try:
+                ocr_text = await sarvam_service.ocr_document(file_bytes, req.fileName)
+                if ocr_text.strip():
+                    extracted_text = ocr_text
+            except Exception as e:
+                print("Sarvam OCR exception for Image:", e)
+        if not extracted_text:
+            extracted_text = f"[Scanned Handwritten Document Image: {req.fileName}]"
     else:
         # Fallback for plain text
         try:
-            import base64
-            extracted_text = base64.b64decode(req.contentBase64).decode("utf-8", errors="ignore")
+            extracted_text = file_bytes.decode("utf-8", errors="ignore") if file_bytes else ""
         except Exception:
             extracted_text = "Binary file content."
 
@@ -1022,9 +1039,11 @@ async def stream_chat(job_id: str, request: Request, authorization: str | None =
             stored_f = FILES.get(fid)
             if stored_f and stored_f.get("extractedText"):
                 evidence_texts.append(
-                    f"=== UPLOADED FILE CONTEXT: {stored_f['fileName']} ===\n"
+                    f"=== UPLOADED HISTORICAL/SCANNED DOCUMENT CONTEXT (INDIC VISION OCR VERIFIED): {stored_f['fileName']} ===\n"
+                    f"STRICT ZERO-HALLUCINATION RULE: Rely ONLY on the extracted facts below. "
+                    f"Do not invent names, dates, or terms. If any word in the handwritten document is missing or illegible, state '[Illegible in handwritten paper]'.\n\n"
                     f"{stored_f['extractedText']}\n"
-                    f"================================================="
+                    f"=========================================================================="
                 )
         
         # 1.5 Parse CNR and query eCourts if present

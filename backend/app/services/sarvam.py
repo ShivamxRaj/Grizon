@@ -86,17 +86,23 @@ class SarvamService:
         language: str = "hi-IN",
     ) -> str:
         """
-        Digitizes scanned PDFs or regional language documents using Sarvam Document Intelligence / OCR.
+        Digitizes scanned PDFs, handwritten legal documents, and images using Sarvam Document Intelligence / OCR.
         Returns clean extracted text or Markdown.
         """
         if not self.api_key:
             return ""
 
+        # Determine MIME type from filename extension
+        ext = file_name.lower().split('.')[-1] if '.' in file_name else 'pdf'
+        mime_type = "application/pdf"
+        if ext in ['png', 'jpg', 'jpeg', 'webp', 'bmp', 'tiff']:
+            mime_type = f"image/{ext if ext != 'jpg' else 'jpeg'}"
+
         # Direct REST endpoint for Sarvam OCR / Document Intelligence
         try:
             async with httpx.AsyncClient(timeout=30) as http_client:
                 headers = {"api-subscription-key": self.api_key}
-                files = {"file": (file_name, file_bytes, "application/pdf")}
+                files = {"file": (file_name, file_bytes, mime_type)}
                 data = {"language_code": language, "output_format": "md"}
 
                 resp = await http_client.post(
@@ -107,7 +113,9 @@ class SarvamService:
                 )
                 if resp.status_code == 200:
                     result = resp.json()
-                    return result.get("text", result.get("extracted_text", ""))
+                    extracted = result.get("text", result.get("extracted_text", ""))
+                    if extracted and len(extracted.strip()) > 5:
+                        return extracted
         except Exception as e:
             print("Sarvam OCR REST exception:", e)
 
@@ -119,7 +127,7 @@ class SarvamService:
                     language=language,
                     output_format="md",
                 )
-                if hasattr(res, "text"):
+                if hasattr(res, "text") and getattr(res, "text", ""):
                     return res.text
             except Exception as e:
                 print("Sarvam SDK digitise exception:", e)
